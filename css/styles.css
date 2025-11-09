@@ -1,0 +1,120 @@
+/* styles.css - estilo simple, responsivo y con micro-animaciones */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --muted:#9aa4b2;
+  --accent:#7c5cff;
+  --glass: rgba(255,255,255,0.03);
+  --radius:12px;
+  --container:1100px;
+  --bg-900: #071023;
+  --bg-800: #0b1220;
+  --panel: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  --accent-1: #7c5cff;
+  --accent-2: #5bb8ff;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial;
+  background: linear-gradient(180deg,#071023 0%, #0b1220 100%);
+  color:#e6eef8;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+.container{max-width:var(--container);margin:24px auto;padding:0 16px}
+.site-header{background: linear-gradient(90deg, rgba(124,92,255,0.12), rgba(91,139,255,0.06));padding:36px 0;margin-bottom:8px}
+.site-header h1{margin:0;font-size:clamp(20px,3vw,36px);letter-spacing:-0.02em;font-weight:700;color:#eaf0ff}
+.lead{color:var(--muted);font-size:15px;margin-top:6px}
+.modules ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.modules li{padding:18px;border-radius:calc(var(--radius) - 2px);background:var(--panel);box-shadow:0 4px 12px rgba(2,6,23,0.6);transition:transform .18s ease,box-shadow .18s ease}
+.modules li:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(2,6,23,0.7)}
+.modules a{color:var(--accent);font-weight:600;text-decoration:none}
+.muted{color:var(--muted);margin:8px 0 0;font-size:14px}
+.quickstart{margin-top:22px;background:var(--glass);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 6px 24px rgba(2,6,23,0.5)}
+.note{color:var(--muted);font-size:14px}
+.site-footer{margin-top:36px;padding:18px 20px;border-top:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:10px}
+.footer-inner{max-width:var(--container);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.footer-left{display:flex;flex-direction:column}
+.footer-left strong{font-weight:700;color:#eef6ff}
+.footer-left .muted{color:var(--muted);font-size:13px}
+.footer-right{color:var(--muted);font-size:13px;text-align:right}
+
+/* Código y bloques */
+pre{background:linear-gradient(180deg,#03051a 0%, #071027 100%);border-left:4px solid rgba(124,92,255,0.9);border-radius:8px;padding:14px;overflow:auto;color:#cfe6ff}
+code{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace}
+
+@media (max-width:640px){
+  .modules ul{grid-template-columns:1fr}
+}
+
+/* --- Nuevos estilos: animaciones, botones de copiar, resaltado de bloques --- */
+/* Fade-in para secciones */
+.fade-in{animation:fadeIn .48s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* Highlight pulse for code runs */
+.code-run { box-shadow: 0 6px 20px rgba(124,92,255,0.12); transform: translateY(-4px); transition: transform .18s ease, box-shadow .18s ease }
+
+/* Copy button */
+.code-wrapper{position:relative;margin-top:12px}
+.code-copy-btn{
+  position:absolute;right:10px;top:10px;background:rgba(0,0,0,0.4);border:0;padding:6px 8px;border-radius:6px;color:#e6eef8;cursor:pointer;font-size:13px;backdrop-filter: blur(4px);transition:background .12s ease, transform .12s ease;display:inline-flex;align-items:center;gap:8px}
+.code-copy-btn:hover{background:rgba(0,0,0,0.6);transform:translateY(-2px)}
+.code-copy-btn.copied{background:linear-gradient(90deg,var(--accent),#5b8bff)}
+.code-copy-btn::before{content:'\1F4CB'; /* clipboard emoji fallback */font-size:14px;display:inline-block;transform-origin:center;transition:transform .18s ease}
+.code-copy-btn.copied::before{transform:rotate(18deg) scale(1.06)}
+
+/* Layout helpers for long pages */
+.toc{background:transparent;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);margin-bottom:12px}
+.section-title{display:flex;align-items:center;gap:12px}
+.section-title h2{margin:0;position:relative;padding-left:64px;margin-top:18px}
+.section-title h2::before{
+  content: '';
+  position:absolute;left:10px;top:50%;transform:translateY(-50%) rotate(0deg);
+  width:44px;height:44px;border-radius:10px;background:conic-gradient(from 180deg at 50% 50%,var(--accent-1),var(--accent-2));
+  display:inline-block;box-shadow:0 6px 18px rgba(8,10,20,0.6);
+  transition:transform .45s cubic-bezier(.2,.9,.2,1), box-shadow .2s ease;
+  animation:iconSpin 8s linear infinite;
+}
+@keyframes iconSpin{0%{transform:translateY(-50%) rotate(0deg)}50%{transform:translateY(-50%) rotate(180deg)}100%{transform:translateY(-50%) rotate(360deg)}}
+.section-title h2::after{
+  content:'';position:absolute;left:22px;top:50%;transform:translateY(-50%);width:20px;height:20px;background:#fff;mask-image:radial-gradient(circle 50% at 50% 30%, transparent 30%, black 31%);opacity:.95;mix-blend-mode:overlay}
+
+/* Fancy ordered lists (enumeraciones) */
+ol.fancy{counter-reset:item;margin:12px 0 12px 0;padding-left:0}
+ol.fancy > li{list-style:none;counter-increment:item;margin:8px 0;padding:12px 12px 12px 64px;border-radius:10px;background:rgba(255,255,255,0.02);position:relative;transition:transform .18s ease,box-shadow .18s ease}
+ol.fancy > li:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(2,6,23,0.6)}
+ol.fancy > li::before{content:counter(item);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:8px;background:linear-gradient(180deg,var(--accent-1),var(--accent-2));color:white;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+/* Code block improvements */
+pre{background:linear-gradient(180deg,#03051a 0%, #071027 100%);border-left:4px solid rgba(124,92,255,0.9);border-radius:8px;padding:14px}
+pre code{color:#cfe6ff}
+
+/* Responsive tweaks */
+@media (max-width:900px){ h2{padding-left:48px} h2::before{left:8px} ol.fancy > li{padding-left:52px} }
+
+.footer-inner{max-width:var(--container);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.footer-left{display:flex;flex-direction:column}
+.footer-left strong{font-weight:700;color:#eef6ff}
+.footer-left .muted{color:var(--muted);font-size:13px}
+.footer-right{color:var(--muted);font-size:13px;text-align:right}
+
+/* subtle separator icon */
+.footer-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));padding:6px 10px;border-radius:999px;color:white;font-weight:600;font-size:13px}
+.footer-badge .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.25)}
+
+@media (max-width:720px){
+  .footer-inner{flex-direction:column;align-items:flex-start}
+  .footer-right{text-align:left}
+}
+
+/* micro-animations for badges */
+.badge{transition:transform .18s ease, box-shadow .18s ease}
+.badge:hover{transform:translateY(-4px);box-shadow:0 8px 22px rgba(0,0,0,0.45)}
+
+/* end of professional UI additions */

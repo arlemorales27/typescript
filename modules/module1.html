@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Módulo 1 — Introducción y fundamentos</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+  <main class="container">
+    <a href="/index.html">← Volver al índice</a>
+    <h1 class="hpop">Módulo 1 – Introducción y fundamentos</h1>
+
+    <div class="toc fade-in">
+      <strong>Contenido</strong>
+      <ol class="fancy">
+        <li><a href="#que-es">¿Qué es TypeScript y por qué usarlo?</a></li>
+        <li><a href="#instalacion">Instalación y configuración del entorno</a></li>
+        <li><a href="#primeros-pasos">Primeros pasos con TypeScript</a></li>
+        <li><a href="#tipos-basicos">Tipos básicos</a></li>
+        <li><a href="#variables">Variables, constantes e inferencia</a></li>
+        <li><a href="#funciones">Funciones y tipos</a></li>
+        <li><a href="#interfaces">Interfaces y tipos personalizados</a></li>
+        <li><a href="#clases">Clases y OOP</a></li>
+        <li><a href="#modulos">Módulos y espacio de nombres</a></li>
+        <li><a href="#tsconfig">tsconfig.json y flags importantes</a></li>
+        <li><a href="#ejercicios-1">Ejercicios propuestos</a></li>
+      </ol>
+    </div>
+
+    <section id="que-es" class="fade-in">
+      <div class="section-title"><h2>¿Qué es TypeScript y por qué usarlo frente a JavaScript?</h2><span class="badge">Fundamentos</span></div>
+      <p>TypeScript es un superset de JavaScript que añade tipado estático opcional y herramientas de lenguaje. En proyectos medianos y grandes aporta:</p>
+      <ul>
+        <li>Detección de errores en tiempo de compilación.</li>
+        <li>Mejor autocompletado y navegación en editores.</li>
+        <li>Documentación implícita mediante tipos.</li>
+        <li>Facilita migración y refactorizaciones seguras.</li>
+      </ul>
+      <p>Cuando migrar a TypeScript: proyectos con más de 10k líneas, equipos multipersona, APIs públicas o librerías se benefician mucho del tipado.</p>
+      <div class="code-wrapper">
+        <button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// Ejemplo: detectar error en compilación
+function suma(a: number, b: number){ return a + b }
+// suma('x', 'y') -> error en tiempo de compilación</code></pre>
+      </div>
+    </section>
+
+    <section id="instalacion" class="fade-in">
+      <div class="section-title"><h2>Instalación y configuración del entorno</h2></div>
+      <p>Requisitos: Node.js (recomendado >=18 en 2025), npm/pnpm/yarn, VS Code con extensiones.</p>
+      <h3>Instalación rápida y alternativas</h3>
+      <ol class="fancy">
+        <li>Con npm (proyecto simple)</li>
+        <li>Con pnpm (monorepos y rendimiento)</li>
+        <li>Instalación global vs local (recomiendo local devDependency)</li>
+      </ol>
+
+      <div class="code-wrapper">
+        <button class="code-copy-btn">Copiar</button>
+        <pre class="language-bash"><code># ejemplo (recomendado local)
+npm init -y
+# TypeScript (compilador), ts-node para ejecutar .ts en desarrollo y tipos de Node
+npm install --save-dev typescript ts-node @types/node
+# crear tsconfig
+npx tsc --init
+</code></pre>
+      </div>
+
+      <p>Explicación: <code>ts-node</code> permite ejecutar archivos TypeScript directamente (útil en desarrollo). <code>@types/node</code> aporta tipos para las APIs de Node y mejora el autocompletado y verificación.</p>
+    </section>
+
+    <section id="primeros-pasos" class="fade-in">
+      <div class="section-title"><h2>Primeros pasos con TypeScript</h2></div>
+      <p>Crea un archivo <code>src/index.ts</code>, compílalo y ejecútalo en Node o en el navegador con un bundler.</p>
+
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// src/index.ts
+export interface Greeter { name: string }
+
+export function greet(g: Greeter){
+  console.log(`Hola ${g.name}`)
+}
+
+greet({name: 'Mundo'})
+</code></pre>
+      </div>
+
+      <h4>Compilar y ejecutar</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-bash"><code># 1) Ejecutar directamente con ts-node (sin compilar):
+npx ts-node src/index.ts
+
+# 2) (Alternativa) Compilar y ejecutar con tsc + node:
+npx tsc -p tsconfig.json
+node dist/index.js
+
+# 3) Recomendar añadir scripts en package.json:
+# "dev": "ts-node src/index.ts"
+# "build": "tsc -p tsconfig.json"
+# "start": "node dist/index.js"
+</code></pre>
+      </div>
+
+      <h4>Compilar y ejecutar</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-bash"><code>npx tsc -p tsconfig.json
+node dist/index.js</code></pre>
+      </div>
+    </section>
+
+    <section id="tipos-basicos" class="fade-in">
+      <div class="section-title"><h2>Tipos básicos</h2></div>
+      <p>Tipos primitivos y ejemplos prácticos con validaciones y tips.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// Primitivos y union
+let val: number | null = null;
+val = 3;
+
+// unknown vs any
+function parseJson(s: string): unknown { return JSON.parse(s) }
+const raw = parseJson('{}');
+if(typeof raw === 'object' && raw !== null) {
+  // narrow: trabajar seguro
+}
+</code></pre>
+      </div>
+
+      <h4>Ejemplos que evitan <code>any</code></h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// mejor usar unknown y chequear
+let data: unknown = 'x'
+if(typeof data === 'string') console.log(data.trim())
+</code></pre>
+      </div>
+    </section>
+
+    <section id="variables" class="fade-in">
+      <div class="section-title"><h2>Variables, constantes e inferencia</h2></div>
+      <p>Reglas prácticas: usar <code>const</code> por defecto, <code>let</code> para mutación; evita var.</p>
+      <ol class="fancy">
+        <li>Preferir <code>const</code> y types inmutables.</li>
+        <li>Usar unión con <code>undefined</code> cuando sea necesario.</li>
+        <li>Evitar anotaciones redundantes donde TypeScript infiere el tipo correctamente.</li>
+      </ol>
+    </section>
+
+    <section id="funciones" class="fade-in">
+      <div class="section-title"><h2>Funciones y tipos</h2></div>
+      <p>Parámetros opcionales, default y funciones genéricas con ejemplos detallados.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>function format(name: string, title?: string){
+  return title ? `${title} ${name}` : name
+}
+
+function mapArray<T, U>(arr: T[], fn: (t: T)=>U): U[] { return arr.map(fn) }
+</code></pre>
+      </div>
+
+      <h4>Tipos de función y overloads</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>function parse(input: string): number
+function parse(input: string, radix: number): number
+function parse(input: string, radix?: number){ return Number.parseInt(input, radix) }
+</code></pre>
+      </div>
+    </section>
+
+    <section id="interfaces" class="fade-in">
+      <div class="section-title"><h2>Interfaces y tipos personalizados</h2></div>
+      <p>Cuándo usar <code>interface</code> vs <code>type</code> y patrones recomendados.</p>
+      <ul>
+        <li><code>interface</code> para contratos públicos extensibles.</li>
+        <li><code>type</code> para uniones, literales y utilitarios.</li>
+      </ul>
+
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>interface ApiResponse<T> { status: number; data: T }
+
+type ID = string | number
+
+// ejemplo de uso
+function handle<T>(r: ApiResponse<T>){ console.log(r.status) }
+</code></pre>
+      </div>
+    </section>
+
+    <section id="clases" class="fade-in">
+      <div class="section-title"><h2>Clases y programación orientada a objetos en TS</h2></div>
+      <p>Ejemplo completo con modifiers, getters/setters y métodos estáticos.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>class Logger {
+  static readonly DEFAULT = 'app'
+  constructor(private context = Logger.DEFAULT){}
+  info(msg: string){ console.log(`[${this.context}] ${msg}`) }
+}
+
+const lg = new Logger('server')
+lg.info('arrancando')
+</code></pre>
+      </div>
+    </section>
+
+    <section id="modulos" class="fade-in">
+      <div class="section-title"><h2>Módulos y espacio de nombres</h2></div>
+      <p>Recomendación: usar módulos ES (<code>import/export</code>) y evitar namespaces globales.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// utils.ts
+export function clamp(v: number, min: number, max:number){ return Math.min(max, Math.max(min, v)) }
+
+// main.ts
+import { clamp } from './utils'
+console.log(clamp(5,0,10))
+</code></pre>
+      </div>
+    </section>
+
+    <section id="tsconfig" class="fade-in">
+      <div class="section-title"><h2>Configuración del compilador (<code>tsconfig.json</code>) y flags importantes</h2></div>
+      <p>Flags recomendadas (2025):</p>
+      <ul>
+        <li><code>strict</code> (sí)</li>
+        <li><code>noImplicitAny</code> (sí)</li>
+        <li><code>strictNullChecks</code> (sí)</li>
+        <li><code>incremental</code> (ayuda en proyectos grandes)</li>
+      </ul>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-json"><code>{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "incremental": true
+  }
+}
+</code></pre>
+      </div>
+    </section>
+
+    <section id="ejercicios-1" class="fade-in">
+      <div class="section-title"><h2>Ejercicios propuestos</h2></div>
+      <ol class="fancy">
+        <li>Crea un pequeño paquete con una función exportada y escribe su <code>index.d.ts</code>.</li>
+        <li>Migra una función JS a TS y añade tipos gradualmente.</li>
+        <li>Escribe 5 tests simples tipados para una función matemática.</li>
+      </ol>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>Fin del Módulo 1</strong>
+          <span class="muted">Ejercicios propuestos y lecturas recomendadas · Profesor: Arle Morales Ortiz · 2025</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-badge"><span class="dot"></span> Tutorial completo</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="/js/codecopy.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
