@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Módulo 4 — Avanzado</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+  <main class="container">
+    <a href="../index.html">← Volver al índice</a>
+    <h1 class="hpop">Módulo 4 – Avanzado: patrones, librerías y rendimiento</h1>
+
+    <div class="toc fade-in">
+      <strong>Contenido</strong>
+      <ol class="fancy">
+        <li><a href="#defs">Librerías tipadas y creación de definiciones (*.d.ts)</a></li>
+        <li><a href="#generics-avanz">Generics avanzados</a></li>
+        <li><a href="#manipulacion">Manipulación de tipos complejos</a></li>
+        <li><a href="#rendimiento">Rendimiento del compilador y optimización</a></li>
+        <li><a href="#i18n">Internacionalización y despliegue</a></li>
+        <li><a href="#fullstack">Desarrollo full-stack tipado</a></li>
+        <li><a href="#proyecto-final">Proyecto final</a></li>
+      </ol>
+    </div>
+
+    <section id="defs" class="fade-in">
+      <div class="section-title"><h2>Librerías tipadas y creación de definiciones</h2></div>
+      <p>Cómo empaquetar tipos y publicar paquetes con definiciones incluidas.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// index.d.ts
+export interface Options { timeout?: number }
+export function start(opts?: Options): void;
+</code></pre>
+      </div>
+      <p>En package.json incluye: <code>"types":"index.d.ts"</code> y sube a npm. Mantén sincronizados los tipos con la API real.</p>
+    </section>
+
+    <section id="generics-avanz" class="fade-in">
+      <div class="section-title"><h2>Generics avanzados</h2></div>
+      <p>Paso a paso con múltiples ejemplos: variadic kinds, tuplas variádicas y múltiples parámetros genéricos.</p>
+      <h4>Variadic kinds y tuplas</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// Extract head and tail de una tupla
+type Head<T extends any[]> = T extends [infer H, ...any[]] ? H : never
+type Tail<T extends any[]> = T extends [any, ...infer Rest] ? Rest : []
+
+type H = Head<[1,2,3]> // 1
+type T = Tail<[1,2,3]> // [2,3]
+</code></pre>
+      </div>
+
+      <h4>Multiple generics con constraints</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>function mergeRecords<K extends string, V>(k: K, v: V): Record<K, V>{ return { [k]: v } as any }
+const r = mergeRecords('a', 1) // Record<'a', number>
+</code></pre>
+      </div>
+    </section>
+
+    <section id="manipulacion" class="fade-in">
+      <div class="section-title"><h2>Manipulación de tipos complejos</h2></div>
+      <p>Ejemplos prácticos: recursión en tipos, utilitarios compuestos y técnicas para mantener la performance del compilador.</p>
+
+      <h4>Tipos recursivos y límites</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// ejemplo: DeepReadonly
+type DeepReadonly<T> = { readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K] }
+
+type X = DeepReadonly<{ a: { b: number } }>
+</code></pre>
+      </div>
+
+      <h4>Inferencia condicional en mapped types</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type ReplaceFunctionsWithReturn<T> = { [K in keyof T]: T[K] extends (...args:any[]) => infer R ? R : T[K] }
+
+// ejemplo práctico para convertir servicio en DTO
+</code></pre>
+      </div>
+    </section>
+
+    <section id="rendimiento" class="fade-in">
+      <div class="section-title"><h2>Rendimiento del compilador y optimización</h2></div>
+      <p>Checklist y pasos prácticos para mejorar tiempos de build en monorepos grandes.</p>
+      <ol class="fancy">
+        <li>Habilitar <code>incremental</code> y usar <code>tsc --build</code> para proyectos con references.</li>
+        <li>Separar tipos en paquetes @myorg/types para evitar re-evaluación.</li>
+        <li>Usar esbuild para builds rápidos y tsc para check de tipos como step en CI.</li>
+        <li>Usar la opción <code>skipLibCheck</code> si dependencias externas generan overhead; revisa periodicidad.</li>
+      </ol>
+    </section>
+
+    <section id="i18n" class="fade-in">
+      <div class="section-title"><h2>Internacionalización y despliegue</h2></div>
+      <p>Tipar keys de translation con template literal types para seguridad. Ejemplo:</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type LocaleKey = `home.${'title'|'subtitle'}`
+function t(k: LocaleKey){ /* ... */ }
+</code></pre>
+      </div>
+    </section>
+
+    <section id="fullstack" class="fade-in">
+      <div class="section-title"><h2>Desarrollo full-stack tipado</h2></div>
+      <p>Paso a paso para compartir tipos entre cliente y servidor usando tRPC o OpenAPI.</p>
+      <h4>tRPC conceptual</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// server
+import { initTRPC } from '@trpc/server'
+const t = initTRPC.create()
+export const appRouter = t.router({ getUser: t.procedure.input((i)=>Number(i)).query(()=>({id:1,name:'x'})) })
+
+// client obtiene tipos de appRouter
+</code></pre>
+      </div>
+
+      <h4>OpenAPI / codegen</h4>
+      <p>Genera tipos a partir de especificaciones OpenAPI para sincronizar contratos entre services.</p>
+    </section>
+
+    <section id="proyecto-final" class="fade-in">
+      <div class="section-title"><h2>Proyecto final - checklist y pasos</h2></div>
+      <p>Objetivo: construir aplicación full-stack tipada con pruebas y CI.</p>
+      <ol class="fancy">
+        <li>Inicializa monorepo (pnpm workspaces).</li>
+        <li>Crear paquete <code>@app/types</code> con tipos compartidos.</li>
+        <li>Crear backend (Express/Nest/tRPC) y exponer endpoints tipados.</li>
+        <li>Crear frontend (React+Vite) que importa <code>@app/types</code> y usa los tipos.
+        <li>Agregar pruebas (Vitest/Jest) y pipeline CI (Github Actions) que corra `pnpm -w -r build && pnpm -w -r test`.</li>
+      </ol>
+
+      <h4>Despliegue</h4>
+      <p>Recomendación: despliega backend a un ambiente Node 20 con soporte de ESModules y frontend como artefacto estático. Usa variables de entorno para configuraciones y despliegue en staging antes de producción.</p>
+    </section>
+
+    <section id="ejercicios-4" class="fade-in">
+      <div class="section-title"><h2>Ejercicios Módulo 4</h2></div>
+      <ol class="fancy">
+        <li>Construir paquete <code>@app/types</code> y usar en cliente & servidor.</li>
+        <li>Crear generics avanzados (tuplas variádicas) y medir impacto en tiempo de compilación.</li>
+        <li>Implementar pipeline CI que valide tipos y ejecute tests.</li>
+      </ol>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>Fin del Módulo 4</strong>
+          <span class="muted">Avanzado, despliegue y mantenimiento · Profesor: Arle Morales Ortiz · 2025</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-badge"><span class="dot"></span> Proyecto final</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="../js/codecopy.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

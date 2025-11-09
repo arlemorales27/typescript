@@ -1,0 +1,21 @@
+{
+  "name": "tutorial-typescript",
+  "version": "1.0.0",
+  "description": "Tutorial interactivo de TypeScript (HTML + ejemplos TS)",
+  "main": "dist/hello.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/hello.js",
+    "dev": "ts-node src/hello.ts",
+    "watch": "tsc -w -p tsconfig.json",
+    "prepare-site": "npm run build && rm -rf site && mkdir site && cp -r index.html css js modules dist README.md package.json tsconfig.json .nojekyll site/ || true",
+    "deploy:local": "npm run prepare-site && echo 'site ready in ./site/ — ahora sube a gh-pages si deseas'",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.2.0"
+  },
+  "private": true
+}

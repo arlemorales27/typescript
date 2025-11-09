@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Módulo 2 — Tipado avanzado</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+  <main class="container">
+    <a href="../index.html">← Volver al índice</a>
+    <h1 class="hpop">Módulo 2 – Tipado avanzado y características intermedias</h1>
+
+    <div class="toc fade-in">
+      <strong>Contenido</strong>
+      <ol class="fancy">
+        <li><a href="#generics">Tipos genéricos (generics)</a></li>
+        <li><a href="#utilitarios">Tipos utilitarios integrados</a></li>
+        <li><a href="#condicionales">Tipos condicionales y mapeados</a></li>
+        <li><a href="#tuplas">Tuplas y tipos variádicos</a></li>
+        <li><a href="#satisfies">Operador <code>satisfies</code> y novedades 2025</a></li>
+        <li><a href="#controlflujo">Control de flujo de tipos y guardas</a></li>
+        <li><a href="#decoradores">Decoradores y metaprogramación</a></li>
+        <li><a href="#imports">Módulos dinámicos e importaciones diferidas</a></li>
+        <li><a href="#proyecto">Configuración de proyecto real</a></li>
+        <li><a href="#ejercicios-2">Ejercicios</a></li>
+      </ol>
+    </div>
+
+    <section id="generics" class="fade-in">
+      <div class="section-title"><h2>Tipos genéricos (generics)</h2></div>
+      <p>Los genéricos permiten construir APIs reutilizables y seguras. Vamos paso a paso:</p>
+      <h4>Paso 1 — función genérica sencilla</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>function identity<T>(v: T): T { return v }
+// Uso
+const n = identity<number>(42)
+const s = identity('texto')</code></pre>
+      </div>
+
+      <h4>Paso 2 — funciones genéricas con restricciones</h4>
+      <p>Restringe T para que tenga ciertas propiedades usando <code>extends</code>.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>function getId<T extends { id: number }>(obj: T){ return obj.id }
+const user = { id: 1, name: 'A' }
+getId(user) // OK</code></pre>
+      </div>
+
+      <h4>Paso 3 — contenedores genéricos</h4>
+      <p>Implemente una clase <code>Container</code> con métodos seguros:</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>class Container<T>{
+  private items: T[] = []
+  add(it: T){ this.items.push(it) }
+  remove(): T | undefined { return this.items.pop() }
+}
+const c = new Container<number>(); c.add(1);</code></pre>
+      </div>
+
+      <h4>Paso 4 — funciones genéricas con múltiples parámetros</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>function pair<T, U>(a: T, b: U): [T, U]{ return [a,b] }
+const p = pair<number,string>(1,'a')</code></pre>
+      </div>
+
+      <h4>Buenas prácticas</h4>
+      <ul>
+        <li>Prefiere inferencia cuando tenga sentido.</li>
+        <li>Usa constraints (T extends ...) para limitar y documentar la API.</li>
+        <li>Avoid over‑generalizing: añade generics donde aporten valor real.</li>
+      </ul>
+    </section>
+
+    <section id="utilitarios" class="fade-in">
+      <div class="section-title"><h2>Tipos utilitarios integrados (ejemplos reales)</h2></div>
+      <p>Explicación paso a paso y ejemplos prácticos de uso en código real.</p>
+
+      <h4>Partial&lt;T&gt;</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type User = { id: number; name: string; age?: number }
+function updateUser(u: User, patch: Partial<User>){ return { ...u, ...patch } }
+// Permite patch={ name: 'nuevo' }</code></pre>
+      </div>
+
+      <h4>Readonly&lt;T&gt;</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>const cfg: Readonly<{path:string}> = { path: '/tmp' }
+// cfg.path = '/x' // error</code></pre>
+      </div>
+
+      <h4>Pick / Omit / Record</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type MinimalUser = Pick<User, 'id'|'name'>
+type NoAge = Omit<User, 'age'>
+const dict: Record<string, number> = { a:1 }</code></pre>
+      </div>
+
+      <h4>Combinaciones prácticas</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type Update<T> = Partial<T> & { updatedAt?: string }
+function applyUpdate<T>(obj: T, u: Update<T>){ return {...obj, ...u} }
+</code></pre>
+      </div>
+    </section>
+
+    <section id="condicionales" class="fade-in">
+      <div class="section-title"><h2>Tipos condicionales y mapped types (profundizando)</h2></div>
+      <p>Ejemplos paso a paso que muestran cómo construir utilidades avanzadas.</p>
+
+      <h4>Conditional types básicos</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type IsString<T> = T extends string ? true : false
+type A = IsString<'x'> // true
+</code></pre>
+      </div>
+
+      <h4>Infer con <code>infer</code></h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type ReturnType<T> = T extends (...args:any[]) => infer R ? R : any
+type R = ReturnType<() => number> // number
+</code></pre>
+      </div>
+
+      <h4>Mapped types avanzados</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type Nullable<T> = { [P in keyof T]: T[P] | null }
+// Remover propiedades que sean function
+type NonFunctionProps<T> = { [K in keyof T as T[K] extends Function ? never : K]: T[K] }
+</code></pre>
+      </div>
+
+      <h4>Template literal types</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type EventName = `on${Capitalize<'click'|'hover'>}`
+let e: EventName = 'onClick'
+</code></pre>
+      </div>
+
+      <h4>Operador <code>satisfies</code> (casos prácticos)</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>const route = {
+  method: 'GET',
+  path: '/users'
+} as const satisfies { method: 'GET'|'POST', path: string }
+// mantiene literales y verifica la forma
+</code></pre>
+      </div>
+    </section>
+
+    <section id="tuplas" class="fade-in">
+      <div class="section-title"><h2>Tuplas y tipos variádicos (avance práctico)</h2></div>
+      <p>Ejemplos sobre cómo modelar APIs con tuplas y spreads.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// tupla fija y readonly
+type Point = readonly [number, number]
+const origin: Point = [0,0]
+
+// Function that keeps tuple types
+type Concat<T extends any[], U extends any[]> = [...T, ...U]
+type R = Concat<[1,2], ['a','b']> // [1,2,'a','b']
+</code></pre>
+      </div>
+
+      <h4>Uso en práctica: middlewares</h4>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type Middleware<Args extends any[]> = (...args: Args) => void
+function use<A extends any[]>(...m: Middleware<A>[]){}
+
+use<(req: any, res: any) => void>(()=>{})
+</code></pre>
+      </div>
+
+      <h4>Import defer y carga perezosa (nota 2025)</h4>
+      <p>TS 5.9 introduce <code>import defer</code> (novedad 2025) — sintaxis para indicar importaciones diferidas a nivel semántico (ver soporte en bundlers).</p>
+    </section>
+
+    <section id="ejercicios-2" class="fade-in">
+      <div class="section-title"><h2>Ejercicios avanzados - Módulo 2</h2></div>
+      <ol class="fancy">
+        <li>Crear una función genérica <code>groupBy<T,K extends keyof T></code> que agrupe elementos por una propiedad.</li>
+        <li>Implementar un utilitario de tipos que haga opcionales solo las propiedades seleccionadas de un tipo <code>PartialBy&lt;T,K&gt;</code>.</li>
+        <li>Construir un tipo recursivo que convierta todas las propiedades en cadenas (<code>Stringify</code>).</li>
+      </ol>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>Fin del Módulo 2</strong>
+          <span class="muted">Ejercicios avanzados y prácticas recomendadas · Profesor: Arle Morales Ortiz · 2025</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-badge"><span class="dot"></span> Tipado avanzado</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="../js/codecopy.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>
