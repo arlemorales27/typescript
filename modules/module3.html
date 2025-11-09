@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Módulo 3 — Integración y herramientas</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+  <main class="container">
+    <a href="../index.html">← Volver al índice</a>
+    <h1 class="hpop">Módulo 3 – Integración con entorno, herramientas y frameworks</h1>
+
+    <div class="toc fade-in">
+      <strong>Contenido</strong>
+      <ol class="fancy">
+        <li><a href="#dts">Ficheros de definición (.d.ts) y interoperabilidad</a></li>
+        <li><a href="#frontend">Desarrollo frontend con TS (React/Vue/Angular)</a></li>
+        <li><a href="#backend">Desarrollo backend con TS</a></li>
+        <li><a href="#tooling">Tooling moderno (Vite, esbuild, bundlers)</a></li>
+        <li><a href="#migracion">Migración de JavaScript a TypeScript</a></li>
+        <li><a href="#testing">Pruebas, linters y calidad de código</a></li>
+        <li><a href="#patrones">Patrones y arquitectura</a></li>
+        <li><a href="#ejercicios-3">Ejercicios</a></li>
+      </ol>
+    </div>
+
+    <section id="dts" class="fade-in">
+      <div class="section-title"><h2>Ficheros de definición (.d.ts) y interoperabilidad</h2></div>
+      <p>Paso a paso para crear definiciones para librerías JS:</p>
+      <p>Concepto: un archivo <code>.d.ts</code> declara la "superficie" de una librería JavaScript para que TypeScript conozca tipos y firmas.</p>
+      <h5>Ejemplo paso a paso</h5>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>// mylib.d.ts
+declare module 'mylib' {
+  export function greet(name: string): string
+  export interface Options { verbose?: boolean }
+}
+</code></pre>
+      </div>
+
+      <h5>Generar tipos a partir de JS</h5>
+      <p>Herramientas: <code>dts-gen</code>, JSDoc + <code>checkJs</code>, o escribir a mano para control fino.</p>
+    </section>
+
+    <section id="frontend" class="fade-in">
+      <div class="section-title"><h2>Desarrollo frontend con TypeScript</h2></div>
+      <p>Paso a paso: ejemplo React con props complejas y test.</p>
+
+      <h5>Patrón: Props tipadas y composición</h5>
+      <p>Definir props con interfaces y usar forwardRef, generic props y discriminated unions para componentes complejos.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>type ButtonProps = { onClick: (ev: MouseEvent) =&gt; void; label: string }
+export function Button({onClick,label}: ButtonProps){
+  return &lt;button onClick={onClick}&gt;{label}&lt;/button&gt;
+}
+</code></pre>
+      </div>
+
+      <h5>Integración con frameworks</h5>
+      <p>React/Vue/Angular ofrecen plantillas y reglas para tipado; en 2025 la integración con TS es la norma (create-react-app / Vite ya generan proyectos TS por defecto).</p>
+    </section>
+
+    <section id="backend" class="fade-in">
+      <div class="section-title"><h2>Desarrollo backend con TypeScript</h2></div>
+      <p>Paso a paso: Express tipado y ejemplo GraphQL tipado con Nexus / TypeGraphQL.</p>
+
+      <h5>Tipado de DTOs y validación</h5>
+      <p>Usa DTOs para separar la forma de los datos y librerías de validación (Zod, class-validator) para runtime validation.</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>import express from 'express'
+import { z } from 'zod'
+
+const app = express()
+const userSchema = z.object({ id: z.number(), name: z.string() })
+
+app.get('/user/:id', (req, res) =&gt; {
+  const id = Number(req.params.id)
+  const user = { id, name: 'x' }
+  const parsed = userSchema.parse(user)
+  res.json(parsed)
+})
+</code></pre>
+      </div>
+    </section>
+
+    <section id="tooling" class="fade-in">
+      <div class="section-title"><h2>Tooling moderno para TS</h2></div>
+      <p>Recomendación práctica: usar Vite para frontend (dev server rápido) y esbuild para builds simples. Ejemplo Vite:</p>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-bash"><code>npm create vite@latest my-app -- --template react-ts
+cd my-app
+npm install
+npm run dev</code></pre>
+      </div>
+
+      <h5>Integración con linters y formatters</h5>
+      <p>ESLint + <code>@typescript-eslint</code> y Prettier. Ejecutar <code>tsc --noEmit</code> en CI para validar tipos.</p>
+    </section>
+
+    <section id="migracion" class="fade-in">
+      <div class="section-title"><h2>Migración de JavaScript a TypeScript</h2></div>
+      <p>Guía paso a paso:</p>
+      <h5>Estrategia práctica</h5>
+      <ol class="fancy">
+        <li>Habilitar <code>allowJs</code> y <code>checkJs</code>.</li>
+        <li>Convertir archivo a archivo: renombra <code>.js</code> a <code>.ts</code> progresivamente.</li>
+        <li>Usar <code>// @ts-expect-error</code> temporalmente y eliminarlo una vez corregido.</li>
+      </ol>
+    </section>
+
+    <section id="testing" class="fade-in">
+      <div class="section-title"><h2>Pruebas, linters y calidad</h2></div>
+      <p>Ejemplo de configuración ESLint + @typescript-eslint y script de test con Vitest/Jest.</p>
+      <h5>Integración en CI</h5>
+      <p>Ejecuta en CI: <code>npm ci && npm run build && npm test && npm run lint</code>. Usa caches para acelerar.</p>
+    </section>
+
+    <section id="patrones" class="fade-in">
+      <div class="section-title"><h2>Patrones de diseño y arquitectura usando TS</h2></div>
+      <p>Inyección de dependencias, DTOs, servicios y repositorios tipados. Ejemplo breve:</p>
+      <h5>Patrón: inyección de dependencias tipada</h5>
+      <div class="code-wrapper"><button class="code-copy-btn">Copiar</button>
+        <pre class="language-ts"><code>interface IUserRepo { findById(id:number): Promise&lt;{id:number,name:string}&gt; }
+class UserService { constructor(private repo: IUserRepo){} async get(id:number){ return this.repo.findById(id) } }
+</code></pre>
+      </div>
+    </section>
+
+    <section id="ejercicios-3" class="fade-in">
+      <div class="section-title"><h2>Ejercicios Módulo 3</h2></div>
+      <ol class="fancy">
+        <li>Crear <code>globals.d.ts</code> para una librería legacy y escribir tests que lo usen.</li>
+        <li>Migrar un endpoint pequeño a TS y añadir pruebas tipadas.</li>
+        <li>Configurar ESLint + CI para comprobar type checks en PRs.</li>
+      </ol>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>Fin del Módulo 3</strong>
+          <span class="muted">Integración, herramientas y prácticas · Profesor: Arle Morales Ortiz · 2025</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-badge"><span class="dot"></span> Integración & Tooling</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="../js/codecopy.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>
