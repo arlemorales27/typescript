@@ -4,13 +4,15 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build:
     name: Build site
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,14 +22,15 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies (npm)
+        run: npm install
 
       - name: Run build (TypeScript)
         run: npm run build
 
       - name: Prepare `site` folder
         run: |
+          set -e
           rm -rf site
           mkdir site
           # Copy only the files needed for the static site
@@ -36,7 +39,9 @@ jobs:
           [ -d site/modules ] || mkdir -p site/modules
 
       - name: List site contents (debug)
-        run: ls -la site && echo "-- recursive --" && ls -laR site | sed -n '1,200p'
+        run: |
+          echo "Site top-level files:" && ls -la site || true
+          echo "Site recursive listing (first 200 lines):" && ls -laR site | sed -n '1,200p' || true
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v1
@@ -47,10 +52,6 @@ jobs:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: build
-    permissions:
-      pages: write
-      id-token: write
     steps:
       - name: Deploy
         uses: actions/deploy-pages@v1
-
